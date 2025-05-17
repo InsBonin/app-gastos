@@ -5,24 +5,35 @@ import { ActivityIndicator, View } from 'react-native';
 import { auth } from './firebase';
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
+import SplashScreen from './screens/SplashScreen';
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      setLoading(false);
+      setCheckingAuth(false);
     });
 
-    return unsubscribe;
+    const splashTimer = setTimeout(() => setShowSplash(false), 2000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(splashTimer);
+    };
   }, []);
 
-  if (loading) {
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
+  if (checkingAuth) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" />
       </View>
     );
   }

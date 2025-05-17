@@ -20,7 +20,6 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.replace('Home');
     } catch (error) {
       Alert.alert('Erro no login', error.message);
     } finally {
