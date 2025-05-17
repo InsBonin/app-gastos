@@ -1,9 +1,13 @@
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { auth, db } from '../firebase';
+
+
 
 export default function HomeScreen() {
     const navigation = useNavigation();
@@ -11,6 +15,15 @@ export default function HomeScreen() {
     const [loading, setLoading] = useState(true);
 
     const user = auth.currentUser;
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+        } catch (error) {
+            // console.error('Erro ao sair:', error);
+        }
+    };
+
 
     useEffect(() => {
         if (!user) return;
@@ -50,16 +63,35 @@ export default function HomeScreen() {
     const renderItem = ({ item }) => (
         <View style={styles.item}>
             <Text style={styles.description}>{item.description}</Text>
-            <Text style={styles.value}>R$ {item.value.toFixed(2)}</Text>
+            <View style={styles.rightSection}>
+                <Text style={styles.value}>R$ {item.value.toFixed(2)}</Text>
+                <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                    <Icon name="delete" size={20} color="gray" style={styles.trashIcon} />
+                </TouchableOpacity>
+            </View>
         </View>
     );
+
+
+    const handleDelete = async (id) => {
+        try {
+            await deleteDoc(doc(db, 'expenses', id));
+        } catch (error) {
+            console.error('Erro ao deletar gasto:', error);
+        }
+    };
+
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Total de Gastos</Text>
                 <Text style={styles.total}>R$ {totalValue}</Text>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Text style={styles.logoutText}>Sair</Text>
+                </TouchableOpacity>
             </View>
+
 
             {loading ? (
                 <ActivityIndicator size="large" color="#007AFF" />
@@ -144,5 +176,26 @@ const styles = StyleSheet.create({
         fontSize: 28,
         color: '#fff',
         marginBottom: 2,
+    },
+    rightSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    trashIcon: {
+        marginLeft: 12,
+        paddingRight: 5,
+        color: 'red'
+    },
+    logoutButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        padding: 10,
+    },
+
+    logoutText: {
+        color: 'red',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
 });

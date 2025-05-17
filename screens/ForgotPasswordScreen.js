@@ -1,13 +1,17 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 import { auth } from '../firebase';
 
 export default function ForgotPasswordScreen() {
+  const route = useRoute();
+  const emailFromLogin = route.params?.email || '';
+
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(emailFromLogin);
   const [loading, setLoading] = useState(false);
+
 
   const handleReset = async () => {
     if (!email) {

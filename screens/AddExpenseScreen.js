@@ -44,7 +44,7 @@ export default function AddExpenseScreen() {
                 date,
             });
 
-            navigation.navigate('Home');
+            navigation.goBack();
 
         } catch (error) {
             console.log('Erro ao salvar gasto:', error);
